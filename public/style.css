@@ -1,63 +1,58 @@
+/* Estilos generales */
 body {
-  font-family: "Poppins", Arial, sans-serif; /* O puedes usar 'Roboto' en lugar de 'Poppins' */
+  font-family: "Roboto", Arial, sans-serif;
   text-align: center;
-  background-color: #451047;
-  color: #503959;
+  background-color: #121212; /* Fondo oscuro */
+  color: #e0e0e0; /* Texto claro */
 }
 
+/* Secciones */
 section {
   margin: 20px auto;
   width: 50%;
   padding: 10px;
-  background-color: #d0bdf4;
-  border: 10px solid #8458b3;
+  background-color: #1e1e1e; /* Fondo oscuro para secciones */
+  border: 10px solid #444444; /* Bordes gris oscuro */
   border-radius: 10px;
   transition: transform 0.3s ease-in-out, background-color 0.3s ease;
 }
 
 section:hover {
   transform: scale(1.025);
-  background-color: #c1a5f3;
+  background-color: #2a2a2a;
 }
 
+/* Botones generales */
 button {
   margin-top: 10px;
   margin-right: 25px;
   padding: 12px 25px;
   font-size: 16px;
-  background-color: #8458b3;
-  color: white;
-  border: 2px solid #8458b3;
+  background-color: #444444; /* Fondo gris oscuro */
+  color: #e0e0e0; /* Texto claro */
+  border: 2px solid #444444; /* Borde igual que el fondo */
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #d0bdf4;
+  background-color: #2a2a2a; /* Fondo más oscuro al hover */
   transform: scale(1.1);
-  color: #503959;
+  color: #81d4fa; /* Color cian claro */
 }
 
 button:active {
-  background-color: #a076c4;
+  background-color: #555555; /* Presionado: gris intermedio */
   transform: scale(1.05);
-  color: #ececec;
+  color: #bdbdbd; /* Texto gris claro */
 }
 
-textarea,
-input {
-  width: 95%;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #e5eaf5;
-  color: #503959;
-}
-
+/* Botones específicos */
 button#x {
-  border: 2px solid #ececec;
+  border: 2px solid #e0e0e0; /* Gris claro */
   background-color: transparent;
-  color: #ececec;
+  color: #e0e0e0;
   font-size: 18px;
   padding: 6px 12px;
   border-radius: 8px;
@@ -65,12 +60,24 @@ button#x {
 }
 
 button#x:hover {
-  background-color: #dc3545;
+  background-color: #ff5252; /* Rojo intenso */
   color: white;
-  border-color: #dc3545;
+  border-color: #ff5252;
   transform: scale(1.1);
 }
 
+/* Textareas e inputs */
+textarea,
+input {
+  width: 95%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #1e1e1e; /* Fondo oscuro */
+  color: #e0e0e0; /* Texto claro */
+  border-radius: 10px;
+}
+
+/* Contenedores de filas */
 .row {
   display: flex;
   justify-content: space-between;
@@ -78,31 +85,32 @@ button#x:hover {
   flex-wrap: wrap;
 }
 
+/* Contenedor de miembros */
 .member-container {
   display: flex;
   align-items: center;
   align-content: center;
   flex: auto;
   justify-content: left;
-  padding: 15px;
-  margin: 10px;
-  background-color: #8458b3;
+  padding: 20px;
+  margin: 20px auto;
+  background-color: #2a2a2a; /* Fondo oscuro */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s;
-  color: #ececec;
+  color: #e0e0e0;
 }
 
 .member-container:hover {
-  background-color: #d0bdf4;
-  color: #503959;
+  background-color: #424242; /* Gris más claro */
+  color: #81d4fa; /* Texto cian claro */
   transform: translateY(-7px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .member-container:hover #x {
-  color: #503959;
-  border: 2px solid #503959;
+  color: #81d4fa;
+  border: 2px solid #81d4fa;
 }
 
 .member-container p {
@@ -111,36 +119,38 @@ button#x:hover {
 }
 
 .member-container button {
-  margin-left: 10px;
+  margin-left: 17px;
   justify-content: center;
-  margin-bottom: 9px;
+  margin-bottom: 10px;
 }
 
+/* Columnas */
 .col-md-6 {
   flex: 1 1 50%;
 }
 
+/* Contenedor de ruleta */
 #ruletaContainer {
   margin: 20px auto;
   padding: 20px;
-  background-color: #8458b3;
+  background-color: #2a2a2a; /* Fondo oscuro */
   border-radius: 15px;
-  border: 5px solid #8458b3;
+  border: 5px solid #444444; /* Bordes oscuros */
   transition: border-color 0.3s ease, background-color 0.3s ease;
-  color: #ececec;
+  color: #e0e0e0; /* Texto claro */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #ruletaContainer:hover {
-  background-color: #d0bdf4;
-  border-color: #503959;
-  color: #503959;
+  background-color: #424242;
+  border-color: #81d4fa;
+  color: #81d4fa;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 #ruletaContainer:hover #x {
-  color: #503959;
-  border: 2px solid #503959;
+  color: #81d4fa;
+  border: 2px solid #81d4fa;
 }
 
 #ruletaContainer p {
@@ -152,7 +162,25 @@ button#x:hover {
   margin-left: 17px;
 }
 
+/* Encabezados */
 #equipos h3 {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+#probabilidades {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#inner-ruleta {
+  position: relative;
+  text-align: center;
+}
+
+#ruletaWrapper {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: auto;
 }

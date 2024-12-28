@@ -1,29 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Proyecto</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="/style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-    />
-  </head>
-  <body>
-    <!-- Ruleta -->
-    <section id="ruleta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proyecto</title>
+  <!-- Fuentes y estilos -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;family=Roboto:wght@400;700&amp;display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="/style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+  />
+</head>
+
+<body>
+  <!-- Ruleta -->
+  <section id="ruleta">
+    <div id="inner_ruleta">
       <h2>La Ruleta</h2>
+
+      <!-- Contenedor de la ruleta y el indicador -->
+      <div id="ruletaWrapper">
+        <canvas id="ruletaCanvas" width="500" height="500"></canvas>
+
+        <!-- Indicador visual -->
+        <div id="ruletaIndicator"></div>
+      </div>
+
+      <!-- Controles -->
       <div id="ruletaContainer" class="row m-3"></div>
       <textarea
         id="nuevoElemento"
@@ -34,248 +45,312 @@
       <button id="girarRuleta">Girar La Ruleta</button>
       <button id="borrarRuleta">Borrar La Ruleta</button>
       <p id="probabilidades"></p>
-    </section>
+    </div>
+  </section>
 
-    <!-- Sorteo de equipos -->
-    <section id="sorteo">
-      <h2>Sorteo de Equipos</h2>
-      <textarea
-        id="nombres"
-        placeholder="Escribe los nombres, uno por línea."
-        autocomplete="off"
-      ></textarea>
-      <button id="sortearEquipos">Sortear equipos</button>
-      <button id="borrarEquipos">Borrar Equipos</button>
-      <div id="equipos" class="row"></div>
-    </section>
+  <!-- Sorteo de equipos -->
+  <section id="sorteo">
+    <h2>Sorteo de Equipos</h2>
+    <textarea
+      id="nombres"
+      placeholder="Escribe los nombres, uno por línea."
+      autocomplete="off"
+    ></textarea>
+    <button id="sortearEquipos">Sortear equipos</button>
+    <button id="borrarEquipos">Borrar Equipos</button>
+    <div id="equipos" class="row"><p></p></div>
+  </section>
 
-    <!-- Lógica de la ruleta y sorteo -->
-    <script>
-      let elementosRuleta = [];
-      let equipoA = [];
-      let equipoB = [];
+  <!-- Lógica de la ruleta y sorteo -->
+  <script>
+    // Variables globales
+    let elementosRuleta = [];
+    const canvas = document.getElementById("ruletaCanvas");
+    const ctx = canvas.getContext("2d");
+    let anguloActual = 0; // Ángulo inicial de la ruleta
+    let girando = false; // Bandera para evitar giros simultáneos
 
-      // Función para actualizar la ruleta y mostrar elementos con botón de eliminación
-      function actualizarRuleta() {
-        const container = document.getElementById("ruletaContainer");
-        if (container) {
-          container.innerHTML = "";
-          elementosRuleta.forEach((elemento, index) => {
-            container.innerHTML += `
-              <div class="col-md-4">
-                <p id"textX"">${index + 1}.- ${elemento} </p> 
-                <button
-                  id="x"
-                  type="button"
-                  class="btn btn-outline-danger"
-                  onclick="eliminarElementoRuleta(${index})"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    stroke="currentColor"
-                    stroke-width="1"
-                    fill="currentColor"
-                    class="bi bi-x-lg"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                    ></path>
-                  </svg>
-                  </button
-                >
-              </div>
-            </div>
-            `;
-          });
-        }
+    let equipoA = [];
+    let equipoB = [];
 
-        const probabilidad = (1 / elementosRuleta.length) * 100;
-        document.getElementById(
-          "probabilidades"
-        ).innerText = `Probabilidad de cada elemento: ${probabilidad.toFixed(
-          2
-        )}%`;
-      }
+    /** RULETA */
 
-      // Función para eliminar un elemento de la ruleta
-      function eliminarElementoRuleta(index) {
-        elementosRuleta.splice(index, 1); // Elimina el elemento en el índice dado
-        actualizarRuleta(); // Actualiza la lista
-      }
+    // Actualizar la ruleta visual
 
-      function eliminarRuleta() {
-        // Vacía el array de elementos de la ruleta
-        elementosRuleta.length = 0;
+    dibujarRuleta();
 
-        // Llama a la función que actualiza la visualización de la ruleta
-        actualizarRuleta();
-      }
+    function dibujarRuleta() {
+      if (elementosRuleta.length === 0) return;
 
-      document
-        .getElementById("agregarElemento")
-        .addEventListener("click", () => {
-          const nuevoElemento = document.getElementById("nuevoElemento").value;
-          let array = nuevoElemento.split("\n");
-          array.forEach((elemento, index) => {
-            elementosRuleta.push(array[index]);
-            actualizarRuleta();
-          });
-        });
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = centerX;
+      const anglePerSegment = (2 * Math.PI) / elementosRuleta.length;
 
-      document.getElementById("girarRuleta").addEventListener("click", () => {
-        if (elementosRuleta.length > 0) {
-          const ganador =
-            elementosRuleta[Math.floor(Math.random() * elementosRuleta.length)];
-          alert(`El elemento seleccionado es: ${ganador}`);
-        }
+      // Colores para los segmentos
+      const colores = ["#424242", "#37474f", "#212121"]; // Tres colores: gris, azul, amarillo
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      elementosRuleta.forEach((elemento, index) => {
+        const startAngle = index * anglePerSegment - anguloActual;
+        const endAngle = startAngle + anglePerSegment;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+
+        // Asignar color basado en el índice del segmento
+        ctx.fillStyle = colores[index % 3]; // Usa % 3 para alternar entre 3 colores
+        ctx.fill();
+        ctx.stroke();
+
+        // Dibujar texto en el segmento
+        const textAngle = startAngle + anglePerSegment / 2;
+        const textX = centerX + Math.cos(textAngle) * (radius / 1.5);
+        const textY = centerY + Math.sin(textAngle) * (radius / 1.5);
+
+        ctx.fillStyle = "#000";
+        ctx.font = "14px Roboto";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(elemento, textX, textY);
       });
+    }
 
-      document.getElementById("borrarRuleta").addEventListener("click", () => {
-        if (elementosRuleta.length == 0) {
-          alert(`No hay elementos a borrar.`);
-        } else {
-          eliminarRuleta();
+    // Girar la ruleta
+    function girarRuleta() {
+      if (girando) return; // Evitar múltiples giros simultáneos
+      if (elementosRuleta.length === 0) {
+        alert("No hay elementos en la ruleta.");
+        return;
+      }
+
+      girando = true;
+      const totalSegments = elementosRuleta.length;
+      const anglePerSegment = 360 / totalSegments;
+      const targetAngle = Math.random() * 360 + 1440; // Ángulo objetivo con múltiples vueltas
+      let currentAngle = 0;
+
+      const interval = setInterval(() => {
+        currentAngle += 10; // Incremento del ángulo
+        anguloActual = (anguloActual + 10) % 360; // Ajustar ángulo actual
+        dibujarRuleta();
+
+        if (currentAngle >= targetAngle) {
+          clearInterval(interval);
+          girando = false;
+          anguloActual = targetAngle % 360; // Asegurar ángulo final
+
+          const finalAngle = (360 - anguloActual + 90) % 360; // Ajustar al puntero
+          const winnerIndex = Math.floor(finalAngle / anglePerSegment);
+          alert(`¡El ganador es: ${elementosRuleta[winnerIndex]}!`);
         }
-      });
+      }, 20);
+    }
 
-      // Función para actualizar los equipos y mostrar elementos con botón de eliminación
-      function actualizarEquipos() {
-        const container = document.getElementById("equipos");
-        if (container) {
-          container.innerHTML = `
-      <div class="col-md-6">
-        <h3>Equipo A</h3>
-        ${equipoA
-          .map(
-            (nombre, index) => `
-              <div class="member-container">
-                <button
-                  id="x"
-                  type="button"
-                  class="btn btn-outline-danger"
-                  onclick="eliminarMiembro('A', ${index})"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    stroke="currentColor"
-                    stroke-width="1"
-                    fill="currentColor"
-                    class="bi bi-x-lg"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                    ></path>
-                  </svg>
-                </button>
-                <p>${index + 1}.- ${nombre}</p>
-              </div>
-            `
-          )
-          .join("")}
-      </div>
-      <div class="col-md-6">
-        <h3>Equipo B</h3>
-        ${equipoB
-          .map(
-            (nombre, index) => `
-              <div class="member-container">
-                <button
-                  id="x"
-                  type="button"
-                  class="btn btn-outline-danger"
-                  onclick="eliminarMiembro('B', ${index})"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    stroke="currentColor"
-                    stroke-width="1"
-                    fill="currentColor"
-                    class="bi bi-x-lg"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                    ></path>
-                  </svg>
-                </button>
-                <p>${index + 1}.- ${nombre}</p>
-              </div>
-            `
-          )
-          .join("")}
+    // Actualizar la lista de elementos
+    function actualizarRuleta() {
+      const container = document.getElementById("ruletaContainer");
+      if (container) {
+        container.innerHTML = "";
+        elementosRuleta.forEach((elemento, index) => {
+          container.innerHTML += `
+      <div class="col-md-4">
+        <p>${index + 1}.- ${elemento}</p>
+        <button
+          id="x"
+          type="button"
+          class="btn btn-outline-danger"
+          onclick="eliminarElementoRuleta(${index})"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            stroke="currentColor"
+            stroke-width="1"
+            fill="currentColor"
+            class="bi bi-x-lg"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
+            ></path>
+          </svg>
+        </button>
       </div>
     `;
-        }
-      }
-
-      // Función para eliminar un miembro de los equipos
-      function eliminarMiembro(equipo, index) {
-        if (equipo === "A") {
-          equipoA.splice(index, 1); // Elimina el miembro de Equipo A
-        } else if (equipo === "B") {
-          equipoB.splice(index, 1); // Elimina el miembro de Equipo B
-        }
-        actualizarEquipos(); // Actualiza la lista de equipos
-      }
-
-      // Función para vaciar los equipos
-      function eliminarEquipos() {
-        if (equipoA.length == 0 || equipoB.length == 0) {
-          alert(`No hay elementos a borrar.`);
-        } else {
-          equipoA.length = 0;
-          equipoB.length = 0;
-          actualizarEquipos();
-        }
-      }
-
-      // Lógica para repartir los equipos al hacer click en sortear
-      document
-        .getElementById("sortearEquipos")
-        .addEventListener("click", () => {
-          const nombres = document
-            .getElementById("nombres")
-            .value.trim()
-            .split("\n");
-          equipoA.length = 0;
-          equipoB.length = 0;
-
-          // Barajar nombres aleatoriamente
-          const nombresAleatorios = nombres.sort(() => Math.random() - 0.5);
-
-          // Repartir en dos equipos
-          nombresAleatorios.forEach((nombre, index) => {
-            if (index % 2 === 0) {
-              equipoA.push(nombre);
-            } else {
-              equipoB.push(nombre);
-            }
-          });
-
-          actualizarEquipos();
         });
+      }
+      dibujarRuleta();
 
-      // Lógica para vaciar los equipos
-      document.getElementById("borrarEquipos").addEventListener("click", () => {
-        if (equipoA.length === 0 && equipoB.length === 0) {
-          alert("No hay equipos a borrar.");
+      const probabilidad = (1 / elementosRuleta.length) * 100;
+      document.getElementById(
+        "probabilidades"
+      ).innerText = `Probabilidad de cada elemento: ${probabilidad.toFixed(
+        2
+      )}%`;
+    }
+
+    // Eliminar elemento de la ruleta
+    function eliminarElementoRuleta(index) {
+      elementosRuleta.splice(index, 1);
+      actualizarRuleta();
+    }
+
+    // Vaciar la ruleta
+    function eliminarRuleta() {
+      elementosRuleta.length = 0;
+      actualizarRuleta();
+    }
+
+    // Añadir eventos
+    document.getElementById("agregarElemento").addEventListener("click", () => {
+      const nuevoElemento = document
+        .getElementById("nuevoElemento")
+        .value.trim();
+
+      if (nuevoElemento === "") {
+        alert("Debes introducir un elemento.");
+        return;
+      }
+
+      const elementosValidos = nuevoElemento
+        .split("\n")
+        .map((elemento) => elemento.trim())
+        .filter((elemento) => elemento !== "");
+
+      if (elementosValidos.length === 0) {
+        alert("No se detectaron elementos válidos para añadir.");
+        return;
+      }
+
+      elementosRuleta.push(...elementosValidos);
+      actualizarRuleta();
+    });
+
+    document
+      .getElementById("girarRuleta")
+      .addEventListener("click", girarRuleta);
+
+    document.getElementById("borrarRuleta").addEventListener("click", () => {
+      if (elementosRuleta.length === 0) {
+        alert("No hay elementos a borrar.");
+      } else {
+        eliminarRuleta();
+      }
+    });
+
+    /** SORTEO DE EQUIPOS */
+
+    // Actualizar equipos
+    function actualizarEquipos() {
+      const container = document.getElementById("equipos");
+      if (container) {
+        container.innerHTML = `
+            <div class="col-md-6">
+              <h3>Equipo A</h3>
+              ${equipoA
+                .map((nombre, index) => crearMiembroHTML("A", nombre, index))
+                .join("")}
+            </div>
+            <div class="col-md-6">
+              <h3>Equipo B</h3>
+              ${equipoB
+                .map((nombre, index) => crearMiembroHTML("B", nombre, index))
+                .join("")}
+            </div>
+          `;
+      }
+    }
+
+    // Crear HTML para un miembro
+    function crearMiembroHTML(equipo, nombre, index) {
+      return `
+          <div class="member-container">
+            <button
+              id="x"
+              type="button"
+              class="btn btn-outline-danger"
+              onclick="eliminarMiembro('${equipo}', ${index})"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                stroke="currentColor"
+                stroke-width="1"
+                fill="currentColor"
+                class="bi bi-x-lg"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                ></path>
+              </svg>
+            </button>
+            <p>${index + 1}.- ${nombre}</p>
+          </div>
+        `;
+    }
+
+    // Eliminar miembro de un equipo
+    function eliminarMiembro(equipo, index) {
+      if (equipo === "A") {
+        equipoA.splice(index, 1);
+      } else {
+        equipoB.splice(index, 1);
+      }
+      actualizarEquipos();
+    }
+
+    // Vaciar equipos
+    function eliminarEquipos() {
+      equipoA.length = 0;
+      equipoB.length = 0;
+      actualizarEquipos();
+      document.getElementById("equipos").innerHTML = "<p></p>";
+    }
+
+    // Eventos de botones de sorteo de equipos
+    document.getElementById("sortearEquipos").addEventListener("click", () => {
+      const nombres = document
+        .getElementById("nombres")
+        .value.trim()
+        .split("\n");
+      equipoA.length = 0;
+      equipoB.length = 0;
+
+      // Barajar nombres
+      const nombresAleatorios = nombres.sort(() => Math.random() - 0.5);
+
+      // Repartir nombres entre equipos
+      nombresAleatorios.forEach((nombre, index) => {
+        if (index % 2 === 0 && nombre.length > 0) {
+          equipoA.push(nombre);
+          actualizarEquipos();
+        } else if (index % 2 === 1 && nombre.length > 0) {
+          equipoB.push(nombre);
+          actualizarEquipos();
         } else {
-          eliminarEquipos();
+          alert("No se detectaron nombres válidos para el sorteo.");
+          return;
         }
       });
-    </script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
-  </body>
-</html>
+    });
+
+    document.getElementById("borrarEquipos").addEventListener("click", () => {
+      if (equipoA.length === 0 && equipoB.length === 0) {
+        alert("No hay equipos a borrar.");
+      } else {
+        eliminarEquipos();
+      }
+    });
+  </script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+</body>
